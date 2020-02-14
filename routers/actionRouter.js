@@ -18,6 +18,22 @@ router.get('/', (req, res) => {
     });
 });
 
+// GET /api/actions/:id endpont - to get action by ID
+
+router.get('/:id', validatePostId, (req, res) => {
+  Actions.get(req.params.id)
+    .then(action => {
+      if(action) {
+        res.status(200).json(action)
+      } else {
+        res.status(404).json({message: 'Action not found'})
+      }
+    })
+    .catch(err => {
+      res.status(500).json({message: 'There was an error'})
+    })
+})
+
 // PUT /api/actions/:id endpoint to Update an action - ACTIVE
 router.put('/:id', validateAction, (req, res) => {
   Actions.update(req.params.id, req.body)
@@ -63,6 +79,23 @@ function validateAction(req, res, next) {
   } else {
     next();
   }
+}
+
+// Validate ID
+function validatePostId(req, res, next) {
+  Actions.get(req.params.id)
+    .then(action => {
+      if (!action) {
+        res.status(400).json({ message: 'Invalid Post ID' });
+      } else {
+        req.action = req.params.id;
+        next();
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({ message: 'Error validating Post ID' });
+    });
 }
 
 // **********************************************************************
